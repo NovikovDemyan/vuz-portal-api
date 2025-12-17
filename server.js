@@ -14,23 +14,26 @@ const pool = new Pool({
 // ФУНКЦИЯ СОЗДАНИЯ ТАБЛИЦЫ
 const initDB = async () => {
   try {
+    // ВНИМАНИЕ: Это удалит старую таблицу users и создаст новую правильную
+    // После одного успешного запуска эту строку (DROP) можно будет удалить
+    await pool.query('DROP TABLE IF EXISTS users CASCADE;'); 
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
       );
     `);
     
-    // Добавляем тестового админа, если его нет
     await pool.query(`
       INSERT INTO users (username, password) 
       VALUES ('admin', '1234') 
       ON CONFLICT (username) DO NOTHING;
     `);
-    console.log("База данных готова к работе.");
+    console.log("Таблица users пересоздана и готова!");
   } catch (err) {
-    console.error("Ошибка инициализации БД:", err);
+    console.error("Ошибка при обновлении БД:", err);
   }
 };
 
