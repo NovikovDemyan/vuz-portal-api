@@ -2,6 +2,13 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 
+// Настройка CORS
+app.use(cors({
+    origin: 'https://vuz-portal-frontend.onrender.com', // ТВОЙ адрес фронтенда на Render
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 const app = express();
 app.use(express.json());
 app.use(cors());
