@@ -17,11 +17,10 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// Инициализация базы данных
 const initDB = async () => {
     try {
-        // РАСКОММЕНТИРУЙ строку ниже, если получишь ошибку "column does not exist"
-        // await pool.query('DROP TABLE IF EXISTS users CASCADE;'); 
+        // УДАЛИ ДВЕ КОСЫЕ ЧЕРТЫ В НАЧАЛЕ СЛЕДУЮЩЕЙ СТРОКИ:
+        await pool.query('DROP TABLE IF EXISTS users CASCADE;'); 
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
@@ -32,11 +31,12 @@ const initDB = async () => {
                 password TEXT NOT NULL
             );
         `);
-        console.log("База данных готова и структура обновлена.");
+        console.log("Таблица users успешно пересоздана с новыми полями!");
     } catch (err) {
         console.error("Ошибка при инициализации БД:", err);
     }
 };
+
 initDB();
 
 // Маршрут регистрации
