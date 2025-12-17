@@ -2,50 +2,45 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 
-// Настройка CORS
+// 1. Сначала создаем приложение (Инициализация)
+const app = express(); 
+
+// 2. Теперь настраиваем посредников (Middleware)
+app.use(express.json());
+
+// Настройка CORS (теперь 'app' уже существует и ошибки не будет)
 app.use(cors({
-    origin: 'https://vuz-portal-frontend.onrender.com', // ТВОЙ адрес фронтенда на Render
+    origin: 'https://vuz-portal-frontend.onrender.com', 
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-
+// 3. Подключение к базе данных
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ФУНКЦИЯ СОЗДАНИЯ ТАБЛИЦЫ
+// 4. Инициализация таблицы (тот самый код с DROP, если нужно исправить колонку)
 const initDB = async () => {
   try {
-    // ВНИМАНИЕ: Это удалит старую таблицу users и создаст новую правильную
-    // После одного успешного запуска эту строку (DROP) можно будет удалить
-    await pool.query('DROP TABLE IF EXISTS users CASCADE;'); 
-
+    // Включай DROP TABLE только если всё еще видна ошибка "column does not exist"
+    // await pool.query('DROP TABLE IF EXISTS users CASCADE;'); 
     await pool.query(`
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
       );
     `);
-    
-    await pool.query(`
-      INSERT INTO users (username, password) 
-      VALUES ('admin', '1234') 
-      ON CONFLICT (username) DO NOTHING;
-    `);
-    console.log("Таблица users пересоздана и готова!");
+    console.log("База данных готова.");
   } catch (err) {
-    console.error("Ошибка при обновлении БД:", err);
+    console.error("Ошибка БД:", err);
   }
 };
+initDB();
 
-initDB(); // Запускаем проверку при старте сервера
-
+// 5. Роуты (Логика)
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
